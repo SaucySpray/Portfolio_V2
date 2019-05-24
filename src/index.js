@@ -2,6 +2,8 @@ import './css/style.styl'
 
 import './css/reset.styl'
 
+import explosion from '../static/explosion.png'
+
 import * as THREE from 'three'
 import OrbitControls from 'three-orbitcontrols'
 
@@ -22,8 +24,8 @@ export default class Confettis {
             fov: 75,
             aspect: this.containerSize.width / this.containerSize.height,
             near: 1,
-            far: 1000,
-            target: new THREE.Vector3(0, 0, 50),
+            far: 150,
+            target: 40,
         }
 
         this.camera = new THREE.PerspectiveCamera(
@@ -56,16 +58,32 @@ export default class Confettis {
         /**
          * Magic here
          */
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0xb7ff00,
-            wireframe: true
+        this.increment = 0;
+        this.explosion = new Image()
+        this.explosion.src = explosion
+        this.loader = new THREE.TextureLoader()
+        this.start = Date.now()
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: {
+                tExplosion: {
+                    type: "t",
+                    value: this.loader.load(this.explosion.src)
+                },
+                time: { // float initialized to ('(0)')
+                    type: "f",
+                    value: 0.0
+                }
+            },
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent
         })
         this.mesh = new THREE.Mesh(
-            new THREE.CubeGeometry(10, 10, 10),
+            new THREE.IcosahedronGeometry(20, 4),
             this.material
         )
         this.scene.add(this.mesh)
-        
+
 
 
         /**
@@ -74,11 +92,11 @@ export default class Confettis {
         this.controler = null
         this.controlerProps = {
             zoom: {
-                min: 10,
-                max: 200,
+                min: 30,
+                max: 90,
                 speed: 0.2
             },
-            rotateSpeed: 0.1,
+            rotateSpeed: 0.2,
             damping: 1
         }
         this.initControler()
@@ -86,7 +104,7 @@ export default class Confettis {
         /**
          * Events & Animation
          */
-        window.addEventListener('resize', this.resize())
+        window.addEventListener('resize', () => this.resize())
 
         this.loop = this.loop.bind(this)
         this.loop()
@@ -110,17 +128,17 @@ export default class Confettis {
      * Init configurations
      */
     initCamera() {
-        this.camera.lookAt(this.cameraProps.target)
-        this.camera.position.set(0, 0, this.cameraProps.far)
+        this.camera.lookAt(new THREE.Vector3(0, 0, this.cameraProps.far))
+        this.camera.position.set(0, 0, this.cameraProps.target)
         this.camera.updateProjectionMatrix()
     }
 
     initControler() {
-        this.controler =  new OrbitControls(this.camera, this.renderer.domElement)
+        this.controler = new OrbitControls(this.camera, this.renderer.domElement)
         this.controler.minDistance = this.controlerProps.zoom.min
         this.controler.maxDistance = this.controlerProps.zoom.max
         this.controler.rotateSpeed = this.controlerProps.zoom.speed
-        this.controler.autoRotate = true
+        this.controler.autoRotate = false
         this.controler.autoRotateSpeed = this.controlerProps.rotateSpeed
         this.controler.enableDamping = true
         this.controler.enablePan = false
@@ -131,11 +149,18 @@ export default class Confettis {
      * Animate
      */
     update() {
+        // Experience
+        // this.increment += 0.1
+        // this.mesh.position.x = Math.cos(this.increment)
+        // this.mesh.position.y = Math.cos(-3 * (this.increment))
+
+        // Update
         this.controler.update()
         this.renderer.setSize(this.containerSize.width, this.containerSize.height)
     }
 
     render() {
+        this.material.uniforms[ 'time' ].value = .00025 * ( Date.now() - this.start )
         this.renderer.render(this.scene, this.camera)
     }
 
