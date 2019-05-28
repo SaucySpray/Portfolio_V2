@@ -3,10 +3,13 @@ import './css/style.styl'
 import './css/reset.styl'
 
 import explosion from '../static/explosion.png'
+import laser from '../static/laser.png'
 
 import * as THREE from 'three'
 import OrbitControls from 'three-orbitcontrols'
 
+import vertexShader from './glsl/wobble.vert'
+import fragmentShader from './glsl/wobble.frag'
 
 export default class Confettis {
     constructor(_DOMel) {
@@ -60,31 +63,26 @@ export default class Confettis {
          */
         this.increment = 0;
         this.explosion = new Image()
+        this.laser = new Image()
         this.explosion.src = explosion
+        this.laser.src = laser
         this.loader = new THREE.TextureLoader()
         this.start = Date.now()
 
-        this.material = new THREE.ShaderMaterial({
-            uniforms: {
-                tExplosion: {
-                    type: "t",
-                    value: this.loader.load(this.explosion.src)
-                },
-                time: { // float initialized to ('(0)')
-                    type: "f",
-                    value: 0.0
-                }
-            },
-            vertexShader: document.getElementById('vertexShader').textContent,
-            fragmentShader: document.getElementById('fragmentShader').textContent
+        this.material2 = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            wireframe: false
         })
-        this.mesh = new THREE.Mesh(
-            new THREE.IcosahedronGeometry(20, 4),
-            this.material
+        
+        this.mesh2 = new THREE.Mesh(
+            new THREE.SphereGeometry(10, 32, 32),
+            this.material2
         )
-        this.scene.add(this.mesh)
 
+        // this.scene.add(this.mesh2)
 
+        this.createPlanet(10, this.loader.load(this.explosion.src), false)
+        // this.createPlanet(20, this.loader.load(this.laser.src), true)
 
         /**
          * Controler
@@ -92,8 +90,8 @@ export default class Confettis {
         this.controler = null
         this.controlerProps = {
             zoom: {
-                min: 30,
-                max: 90,
+                min: 44,
+                max: 44,
                 speed: 0.2
             },
             rotateSpeed: 0.2,
@@ -108,6 +106,35 @@ export default class Confettis {
 
         this.loop = this.loop.bind(this)
         this.loop()
+    }
+
+    /**
+     * CreatePlanet
+     */
+    createPlanet(_radius, _texture, _isTransparent) {
+        this.material = new THREE.ShaderMaterial({
+            uniforms: {
+                tExplosion: {
+                    type: "t",
+                    value: _texture
+                },
+                time: { // float initialized to ('(0)')
+                    type: "f",
+                    value: 0.0
+                }
+            },
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader
+        })
+        this.material.transparent = _isTransparent;
+
+        //create a mesh
+        this.mesh = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(_radius, 6),
+            this.material
+        )
+
+        this.scene.add(this.mesh)
     }
 
     /**
@@ -160,7 +187,7 @@ export default class Confettis {
     }
 
     render() {
-        this.material.uniforms[ 'time' ].value = .00025 * ( Date.now() - this.start )
+        this.material.uniforms[ 'time' ].value = .00015 * ( Date.now() - this.start )
         this.renderer.render(this.scene, this.camera)
     }
 
