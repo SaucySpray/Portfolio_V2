@@ -68,21 +68,21 @@ export default class Confettis {
         this.laser.src = laser
         this.loader = new THREE.TextureLoader()
         this.start = Date.now()
+        this.materialTab = []
 
-        this.material2 = new THREE.MeshBasicMaterial({
-            color: 0xff0000,
-            wireframe: false
-        })
+        // Create material textures
+        // kernel texture
+        this.createMaterial(this.loader.load(this.explosion.src), false)
+        this.materialTab[0].name = "kernel"
+        // atmosphere texture
+        this.createMaterial(this.loader.load(this.laser.src), true)
+        this.materialTab[1].name = "atmosphere"
+
+        // Create object3D
+        this.createPlanet(this.materialTab[0], 10)
+        this.createPlanet(this.materialTab[1], 20)
+        console.log(this.materialTab[0]);
         
-        this.mesh2 = new THREE.Mesh(
-            new THREE.SphereGeometry(10, 32, 32),
-            this.material2
-        )
-
-        // this.scene.add(this.mesh2)
-
-        this.createPlanet(10, this.loader.load(this.explosion.src), false)
-        // this.createPlanet(20, this.loader.load(this.laser.src), true)
 
         /**
          * Controler
@@ -111,7 +111,7 @@ export default class Confettis {
     /**
      * CreatePlanet
      */
-    createPlanet(_radius, _texture, _isTransparent) {
+    createMaterial(_texture, _isTransparent) {
         this.material = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
@@ -128,12 +128,16 @@ export default class Confettis {
         })
         this.material.transparent = _isTransparent;
 
+        this.materialTab.push(this.material)
+    }
+
+    createPlanet(_material, _radius) {
         //create a mesh
         this.mesh = new THREE.Mesh(
             new THREE.IcosahedronGeometry(_radius, 6),
-            this.material
+            _material
         )
-
+        // append
         this.scene.add(this.mesh)
     }
 
@@ -187,7 +191,8 @@ export default class Confettis {
     }
 
     render() {
-        this.material.uniforms[ 'time' ].value = .00015 * ( Date.now() - this.start )
+        this.materialTab[0].uniforms[ 'time' ].value = .00025 * ( Date.now() - this.start )
+        this.materialTab[1].uniforms[ 'time' ].value = .00005 * ( Date.now() - this.start )
         this.renderer.render(this.scene, this.camera)
     }
 
