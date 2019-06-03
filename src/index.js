@@ -2,14 +2,17 @@ import './css/style.styl'
 
 import './css/reset.styl'
 
-import explosion from '../static/explosion.png'
+import explosion from '../static/explosion_white.png'
 import laser from '../static/laser.png'
+import skybox from '../static/skybox.png'
 
 import * as THREE from 'three'
 import OrbitControls from 'three-orbitcontrols'
 
-import vertexShader from './glsl/wobble.vert'
-import fragmentShader from './glsl/wobble.frag'
+import vertexStatic from './glsl/static.vert'
+import vertexSkybox from './glsl/skybox.vert'
+import vertexWobble from './glsl/wobble.vert'
+import fragmentWobble from './glsl/wobble.frag'
 
 export default class Confettis {
     constructor(_DOMel) {
@@ -27,7 +30,7 @@ export default class Confettis {
             fov: 75,
             aspect: this.containerSize.width / this.containerSize.height,
             near: 1,
-            far: 150,
+            far: 10000,
             target: 40,
         }
 
@@ -44,6 +47,7 @@ export default class Confettis {
          */
         this.scene = new THREE.Scene()
         this.scene.autoUpdate = true
+        this.scene.background = new THREE.Color( 0x000000 );
 
         /**
          * Renderer
@@ -64,26 +68,42 @@ export default class Confettis {
         this.increment = 0;
         this.explosion = new Image()
         this.laser = new Image()
+        this.skybox = new Image()
         this.explosion.src = explosion
         this.laser.src = laser
+        this.skybox.src = skybox
         this.loader = new THREE.TextureLoader()
         this.start = Date.now()
         this.materialTab = []
+        this.meshTab = []
+        this.animate = false
+        this.transition = false
 
         // Create material textures
         // kernel texture
-        this.createMaterial(this.loader.load(this.explosion.src), false)
+        this.createMaterial(this.loader.load(this.explosion.src), false, vertexWobble, fragmentWobble)
         this.materialTab[0].name = "kernel"
         // atmosphere texture
-        this.createMaterial(this.loader.load(this.laser.src), true)
+        this.createMaterial(this.loader.load(this.explosion.src), true, vertexStatic, fragmentWobble)
         this.materialTab[1].name = "atmosphere"
+
+        // skybox
+        this.skyboxObject = new THREE.Mesh(
+            new THREE.SphereGeometry(100, 64),
+            new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF,
+                side: THREE.BackSide
+            })
+        )
 
         // Create object3D
         this.createPlanet(this.materialTab[0], 10)
-        this.createPlanet(this.materialTab[1], 20)
-        console.log(this.materialTab[0]);
-        
+        this.materialTab[0].color = 0xFFFFFF
+        this.materialTab[0].side = THREE.BackSide
+        this.createPlanet(this.materialTab[1], 5)
 
+        this.scalingUp = 0
+        
         /**
          * Controler
          */
@@ -102,16 +122,32 @@ export default class Confettis {
         /**
          * Events & Animation
          */
+        this.isPoped = false
         window.addEventListener('resize', () => this.resize())
+        window.addEventListener('click', () => {
+            if(this.animate) {
+                this.transition = true
+            }
+        })
 
         this.loop = this.loop.bind(this)
         this.loop()
+    }
+    /**
+     * Scale
+     */
+    scale ( mesh, scale ) {
+        scale = scale * 4.2
+        mesh.scale.x = scale
+        mesh.scale.y = scale
+        mesh.scale.z = scale
+        if( ! mesh.geometry.boundingBox ) mesh.geometry.computeBoundingBox()
     }
 
     /**
      * CreatePlanet
      */
-    createMaterial(_texture, _isTransparent) {
+    createMaterial(_texture, _isTransparent, _vertex, _fragment) {
         this.material = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
@@ -123,8 +159,8 @@ export default class Confettis {
                     value: 0.0
                 }
             },
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader
+            vertexShader: _vertex,
+            fragmentShader: _fragment
         })
         this.material.transparent = _isTransparent;
 
@@ -133,11 +169,15 @@ export default class Confettis {
 
     createPlanet(_material, _radius) {
         //create a mesh
-        this.mesh = new THREE.Mesh(
-            new THREE.IcosahedronGeometry(_radius, 6),
-            _material
-        )
-        // append
+        if(_radius) {
+            this.mesh = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(_radius, 6),
+                _material
+            )
+            this.meshTab.push(this.mesh)
+        }
+
+        // append to scene
         this.scene.add(this.mesh)
     }
 
@@ -179,6 +219,8 @@ export default class Confettis {
     /**
      * Animate
      */
+    easeInOutCubic(t, v) { return t<.5 ? (v*2)*t*t*t : (t-(v/2))*(v*t-v)*(v*t-v)+(v/2) }
+
     update() {
         // Experience
         // this.increment += 0.1
@@ -191,13 +233,30 @@ export default class Confettis {
     }
 
     render() {
-        this.materialTab[0].uniforms[ 'time' ].value = .00025 * ( Date.now() - this.start )
-        this.materialTab[1].uniforms[ 'time' ].value = .00005 * ( Date.now() - this.start )
+        this.materialTab[0].uniforms[ 'time' ].value = .00015 * ( Date.now() - this.start )
+        this.materialTab[1].uniforms[ 'time' ].value = .000025 * ( Date.now() - this.start )
         this.renderer.render(this.scene, this.camera)
     }
 
     loop() {
         window.requestAnimationFrame(this.loop)
+
+        // Animate atmosphere
+        if(this.scalingUp < 1) {
+            // Scale up fast or slower
+            this.scalingUp += 0.020
+            this.scale(this.meshTab[1], this.easeInOutCubic(this.scalingUp, 2))
+            setTimeout(() => this.animate = true, 1400)
+        }
+
+        // Animate atmosphere
+        if(this.transition) {
+            this.scalingUp += 0.020
+            this.scale(this.meshTab[0], this.easeInOutCubic(this.scalingUp, 0.5))
+            this.scale(this.meshTab[1], this.easeInOutCubic(this.scalingUp, 2))
+            this.transition = true
+            setTimeout(() => {this.scene.add(this.skyboxObject)}, 1500)
+        }
 
         // Renderer & Update
         this.update()

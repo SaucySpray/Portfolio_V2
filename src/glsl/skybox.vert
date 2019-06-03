@@ -204,7 +204,7 @@ void main() {
     float b = 3.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
 
     // Roundness or chaos (10)
-    float displacement = - 12. * noise + b;
+    float displacement = - 2. * noise + b;
 
     vec3 newPosition = position + (normal * displacement) / 12.;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
