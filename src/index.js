@@ -22,6 +22,7 @@ export default class Confettis {
             width: this.$container.offsetWidth,
             height: this.$container.offsetHeight,
         }
+        this.isOver = false
 
         /**
          * Camera
@@ -239,7 +240,9 @@ export default class Confettis {
     }
 
     loop() {
-        window.requestAnimationFrame(this.loop)
+        if(!this.isOver) {
+            window.requestAnimationFrame(this.loop)
+        }
 
         // Animate atmosphere
         if(this.scalingUp < 1) {
@@ -256,6 +259,13 @@ export default class Confettis {
             this.scale(this.meshTab[1], this.easeInOutCubic(this.scalingUp, 2))
             this.transition = true
             setTimeout(() => {this.scene.add(this.skyboxObject)}, 1500)
+            setTimeout(() => {this.isOver = true}, 2500)
+        }
+
+        if(this.isOver) {
+            this.scene.remove(this.meshTab[0])
+            this.scene.remove(this.meshTab[1])
+            this.controler.enabled = false
         }
 
         // Renderer & Update
