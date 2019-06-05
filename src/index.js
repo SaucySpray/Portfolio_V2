@@ -2,15 +2,12 @@ import './css/style.styl'
 
 import './css/reset.styl'
 
-import explosion from '../static/explosion_white.png'
-import laser from '../static/laser.png'
-import skybox from '../static/skybox.png'
+import explosion from '../static/img/explosion_white.png'
 
 import * as THREE from 'three'
 import OrbitControls from 'three-orbitcontrols'
 
 import vertexStatic from './glsl/static.vert'
-import vertexSkybox from './glsl/skybox.vert'
 import vertexWobble from './glsl/wobble.vert'
 import fragmentWobble from './glsl/wobble.frag'
 
@@ -68,11 +65,7 @@ export default class Confettis {
          */
         this.increment = 0;
         this.explosion = new Image()
-        this.laser = new Image()
-        this.skybox = new Image()
         this.explosion.src = explosion
-        this.laser.src = laser
-        this.skybox.src = skybox
         this.loader = new THREE.TextureLoader()
         this.start = Date.now()
         this.materialTab = []
@@ -266,6 +259,12 @@ export default class Confettis {
             this.scene.remove(this.meshTab[0])
             this.scene.remove(this.meshTab[1])
             this.controler.enabled = false
+            setTimeout(() => {
+                document.body.removeChild(this.$container)
+                document.querySelector('.main').style.display = 'flex'
+                // document.querySelector('.main').style.top = 0
+                document.body.style.overflow = visible
+            }, 200)
         }
 
         // Renderer & Update
@@ -274,6 +273,45 @@ export default class Confettis {
     }
 }
 
-const $container = document.querySelector('body')
+const $container = document.querySelector('.canvas')
 
-new Confettis($container)
+// new Confettis($container)
+
+class Portfolio {
+    constructor() {
+        // DOM
+        this.$burger = document.querySelector('.header-menu')
+        this.$burgerEl = document.querySelector('.header-menu-el')
+        this.$burgerEl1 = document.querySelector('.header-menu-el-1')
+        this.$burgerEl2 = document.querySelector('.header-menu-el-2')
+        this.$burgerEl3 = document.querySelector('.header-menu-el-3')
+        this.$sideMenu = document.querySelector('.side-menu')
+
+        // Variables
+        this.isPoped = false
+
+        // Events
+        this.$burger.addEventListener('click', () => {
+            this.popMenu()
+        })
+    }
+    popMenu() {
+        if(!this.isPoped) {
+            this.isPoped = true
+            this.$sideMenu.classList.toggle('side-menu-anim')
+
+            this.$burgerEl1.classList.toggle('header-menu-el-1-anim')
+            this.$burgerEl2.classList.toggle('header-menu-el-2-anim')
+            this.$burgerEl3.classList.toggle('header-menu-el-3-anim')
+        } else {
+            this.isPoped = false
+            this.$sideMenu.classList.toggle('side-menu-anim')
+
+            this.$burgerEl1.classList.toggle('header-menu-el-1-anim')
+            this.$burgerEl2.classList.toggle('header-menu-el-2-anim')
+            this.$burgerEl3.classList.toggle('header-menu-el-3-anim')
+        }
+    }
+}
+
+new Portfolio()
