@@ -1,7 +1,12 @@
-import ScrollTo from 'scroll-animate-to'
-
 export default class Interaction {
     constructor() {
+        /**
+         * Variables
+         */
+        this.isPoped = false
+        this.titleTab = ['WEB', 'ILLUSTRATIONS', 'PHOTOGRAPHY']
+        this.titleScrollMargin = 320
+
         /**
          * DOM
          */
@@ -14,18 +19,59 @@ export default class Interaction {
         this.$burgerEl3 = document.querySelector('.header-menu-el-3')
         this.$sideMenu = document.querySelector('.side-menu')
 
-        // Landing
-        this.$landingTitle = document.querySelector('.landing-title')
+        // Sections
+        this.$web = document.querySelector('.web')
+        this.$illustrations = document.querySelector('.illustrations')
+        this.$photography = document.querySelector('.photography')
+        this.$footer = document.querySelector('.footer')
+        this.$headerLine = document.querySelector('.header-line')
+        this.$headerLineInner = document.querySelector('.header-line-inner')
+
+        this.screenPos = {
+            web: this.$web.offsetTop - this.titleScrollMargin,
+            illustrations: this.$illustrations.offsetTop - this.titleScrollMargin,
+            photography: this.$photography.offsetTop - this.titleScrollMargin,
+            footer: this.$footer.offsetTop
+        }
 
         /**
-         * Variables
+         * ScrollMagic
          */
-        this.isPoped = false
-        this.titleTab = this.tabThis('Hello humans,')
+        this.controller = new ScrollMagic.Controller()
+
+        this.scene1 = new ScrollMagic.Scene({
+            triggerElement: '.web',
+            duration: 100,
+            offset: 50
+        })
+        this.scene1.setClassToggle('fade-in')
+        this.scene1.addTo(this.controller)
 
         /**
          * Events
          */
+        document.body.addEventListener('scroll', () => {
+            if(document.body.scrollTop >= this.screenPos.web && document.body.scrollTop < this.screenPos.illustrations) {
+                this.$headerLineInner.innerHTML = ''
+                this.$headerLineInner.innerHTML = this.titleTab[0]
+            }
+            else if(document.body.scrollTop >= this.screenPos.illustrations && document.body.scrollTop < this.screenPos.photography) {
+                this.$headerLineInner.innerHTML = ''
+                this.$headerLineInner.innerHTML = this.titleTab[1]
+            }
+            else if(document.body.scrollTop >= this.screenPos.photography && document.body.scrollTop < this.screenPos.footer) {
+                this.$headerLineInner.innerHTML = ''
+                this.$headerLineInner.innerHTML = this.titleTab[2]
+            }
+            else if(document.body.scrollTop < this.screenPos.web) {
+                this.$headerLineInner.innerHTML = ''
+            }
+        })
+
+        window.addEventListener('resize', () => {
+            this.updateScrollPos()
+        })
+
         this.$burger.addEventListener('click', () => {
             this.popMenu()
         })
@@ -34,6 +80,12 @@ export default class Interaction {
     /**
      * TOOLS
      */
+    updateScrollPos() {
+        this.screenPos.web = this.$web.offsetTop - this.titleScrollMargin
+        this.screenPos.illustrations = this.$illustrations.offsetTop - this.titleScrollMargin
+        this.screenPos.photography = this.$photography.offsetTop - this.titleScrollMargin
+    }
+
     popMenu() {
         if(!this.isPoped) {
             this.isPoped = true

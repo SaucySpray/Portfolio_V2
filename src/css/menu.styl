@@ -12,9 +12,17 @@
     z-index 20
 
 .header .header-line
+    height 70px
+    overflow hidden
+
+.header .header-line .header-line-inner
     font-family 'Archivo'
     font-size 54px
     color #000
+    box-sizing border-box
+    // transform translateY(110%)
+    // opacity 0
+    transition transform 0.2s cubic-bezier(0.65, 0.01, 0.46, 1)
 
 .header .header-menu
     display flex
@@ -109,6 +117,7 @@
     flex-direction row
     width 340px
     max-width calc(100% - 80px)
+    min-height 56px
     margin 0 auto 80px auto
     font-family 'CircularBlack'
     font-size 16px
@@ -116,6 +125,8 @@
     border-top solid white 1px
 
 .side-menu .menu-contact .menu-contact-title
+    display flex
+    align-items center
     width 100px
 
 .side-menu .menu-contact .menu-contact-social
