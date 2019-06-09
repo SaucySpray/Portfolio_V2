@@ -1,3 +1,5 @@
+import Wheel from './Wheel'
+
 export default class Interaction {
     constructor() {
         /**
@@ -5,7 +7,7 @@ export default class Interaction {
          */
         this.isPoped = false
         this.titleTab = ['WEB', 'ILLUSTRATIONS', 'PHOTOGRAPHY']
-        this.titleScrollMargin = 320
+        this.titleScrollMargin = 140
 
         /**
          * DOM
@@ -27,6 +29,12 @@ export default class Interaction {
         this.$headerLine = document.querySelector('.header-line')
         this.$headerLineInner = document.querySelector('.header-line-inner')
 
+        // Buttons
+        this.$toTop = document.querySelector('.to-top')
+        this.$menuWeb = document.querySelector('.menu-nav-el-1')
+        this.$menuIllustrations = document.querySelector('.menu-nav-el-2')
+        this.$menuPhotography = document.querySelector('.menu-nav-el-3')
+
         this.screenPos = {
             web: this.$web.offsetTop - this.titleScrollMargin,
             illustrations: this.$illustrations.offsetTop - this.titleScrollMargin,
@@ -35,17 +43,14 @@ export default class Interaction {
         }
 
         /**
-         * ScrollMagic
+         * Normalize Wheelie
          */
-        this.controller = new ScrollMagic.Controller()
+        this.wheel = new Wheel
+        this.scrolling = false
 
-        this.scene1 = new ScrollMagic.Scene({
-            triggerElement: '.web',
-            duration: 100,
-            offset: 50
-        })
-        this.scene1.setClassToggle('fade-in')
-        this.scene1.addTo(this.controller)
+        this.wheel.onWheel = (_direction) => {
+            
+        }
 
         /**
          * Events
@@ -70,10 +75,49 @@ export default class Interaction {
 
         window.addEventListener('resize', () => {
             this.updateScrollPos()
+            console.log('pute');
+            if(document.body.offsetWidth < 1023) {
+                document.body.scrollTo({
+                    top: 0,
+                    left: 0,
+                })
+            }
         })
 
         this.$burger.addEventListener('click', () => {
             this.popMenu()
+        })
+
+        this.$toTop.addEventListener('click', () => {
+            document.body.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            })
+        })
+
+        this.$menuWeb.addEventListener('click', () => {
+            document.body.scrollTo({
+                top: this.screenPos.web,
+                left: 0,
+                behavior: 'smooth'
+            })
+        })
+
+        this.$menuIllustrations.addEventListener('click', () => {
+            document.body.scrollTo({
+                top: this.screenPos.illustrations,
+                left: 0,
+                behavior: 'smooth'
+            })
+        })
+
+        this.$menuPhotography.addEventListener('click', () => {
+            document.body.scrollTo({
+                top: this.screenPos.photography,
+                left: 0,
+                behavior: 'smooth'
+            })
         })
     }
 

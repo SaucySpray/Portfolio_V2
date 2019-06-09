@@ -11,6 +11,6 @@ import Animation from './js/Animation'
 import Interaction from './js/Interaction'
 
 const $container = document.querySelector('.canvas')
-new Animation($container)
+window.onload = () => new Animation($container)
 
 new Interaction()

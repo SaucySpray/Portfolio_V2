@@ -1,4 +1,32 @@
 .footer
-    height 120px
+    display flex
+    justify-content space-between
+    align-items center
+    height 60px
     background-color #000
     width 100vw
+    padding 0 190px
+    transition 0.2s cubic-bezier(0.65, 0.01, 0.46, 1)
+    @media screen and (max-width: 1600px)
+        padding 0 80px
+    @media screen and (max-width: 1023px)
+        visibility hidden
+
+.to-top
+    width 28px
+    height 28px
+    border 0px transparent
+    background url('../../static/img/icons/arrow-up.svg')
+    background-repeat no-repeat
+    cursor pointer
+    outline none
+
+.icon-code
+    display flex
+    justify-content space-around
+    width 28px
+    height 28px
+    border 0px transparent
+    background url('../../static/img/icons/code.svg')
+    background-repeat no-repeat
+    outline none
