@@ -3,6 +3,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const webpackMerge = require('webpack-merge')
 const commonConfiguration = require('./webpack.common.js')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 module.exports = webpackMerge(
     commonConfiguration,
@@ -14,7 +15,8 @@ module.exports = webpackMerge(
             new CleanWebpackPlugin(
                 [ 'dist' ],
                 { root: path.resolve(__dirname, '..') }
-            )
+            ),
+            new FaviconsWebpackPlugin('./static/img/my-logo.png')
         ],
         module:
         {

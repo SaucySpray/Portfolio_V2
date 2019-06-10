@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Boilerplate webpack",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "favicons-webpack-plugin": "0.0.9",
+    "lozad": "^1.9.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",

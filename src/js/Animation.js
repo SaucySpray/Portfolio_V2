@@ -261,6 +261,7 @@ export default class Animation {
                 setTimeout(() => {
                     document.querySelector('.main').classList.remove('start-animation')
                     document.querySelector('.header').classList.remove('start-animation')
+                    document.body.style.overflowY = 'visible'
             }, 400)
             }, 200)
         }

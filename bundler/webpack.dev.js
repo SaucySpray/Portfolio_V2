@@ -1,6 +1,7 @@
 const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
 const commonConfiguration = require('./webpack.common.js')
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 module.exports = webpackMerge(
     commonConfiguration,
@@ -9,6 +10,7 @@ module.exports = webpackMerge(
         plugins:
         [
             new webpack.HotModuleReplacementPlugin(),
+            new FaviconsWebpackPlugin('./static/img/my-logo.png')
         ],
         devServer:
         {

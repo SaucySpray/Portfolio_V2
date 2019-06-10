@@ -1,4 +1,4 @@
-import Wheel from './Wheel'
+import lozad from 'lozad'
 
 export default class Interaction {
     constructor() {
@@ -43,14 +43,10 @@ export default class Interaction {
         }
 
         /**
-         * Normalize Wheelie
+         * Lazyload
          */
-        this.wheel = new Wheel
-        this.scrolling = false
-
-        this.wheel.onWheel = (_direction) => {
-            
-        }
+        this.observer = lozad()
+        this.observer.observe()
 
         /**
          * Events
@@ -75,7 +71,6 @@ export default class Interaction {
 
         window.addEventListener('resize', () => {
             this.updateScrollPos()
-            console.log('pute');
             if(document.body.offsetWidth < 1023) {
                 document.body.scrollTo({
                     top: 0,
